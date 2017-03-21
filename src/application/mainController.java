@@ -10,13 +10,16 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 
 public class mainController {
-	AppHandler appHandler = new AppHandler();
+	public static AppHandler appHandler = new AppHandler();
 	
 	@FXML
     private Label filePathLabel;
 	
 	@FXML
 	private Label ipLabel;
+	
+	@FXML
+	private Label statusNote;
 	
 	@FXML
 	private TextField varName;
@@ -34,22 +37,23 @@ public class mainController {
     	try {
 			this.ipLabel.setText("IP: " + InetAddress.getLocalHost().getHostAddress());
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	
-    	Thread socketServer = new Thread(new SocketServer());
-    	socketServer.start();
+    	this.appHandler.receiver.start();    	
     	
     }
 	
     public void addVariable(){
-
+    	statusNote.setText(this.appHandler.varList.addVariable(this.varName.getText(), this.varValue.getText()));
+    	this.refreshView();
     }
     
     public void send() throws IOException{
-    	appHandler.sendMsg(this.inputCmd.getText());
+    	this.appHandler.message.send(this.inputCmd.getText());
     }
     
-	
+	private void refreshView(){
+		this.varList.setItems(this.appHandler.varList.getListViewItems());
+	}
 }

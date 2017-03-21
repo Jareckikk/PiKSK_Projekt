@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class ClientSocket {
+public class ClientThread {
 	
 	public static void send(String ipAddress, String msg) throws IOException{
 

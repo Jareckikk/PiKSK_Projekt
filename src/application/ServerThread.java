@@ -6,27 +6,36 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
-public class SocketServer implements Runnable{
-
+public class ServerThread implements Runnable{
+	ServerSocket serverSocket;
+	
+	ServerThread(ServerSocket ss){
+		this.serverSocket = ss;
+	}
+	
 	public void run(){
+	    Socket socket=null;
 
 		try{
-		    Socket socket=null;
-		    ServerSocket serverSocket=null;
-		    System.out.println("Server Listening......");    
-	    	serverSocket = new ServerSocket(4445); // can also use static final PORT_NUM , when defined
-
-	    while(!Thread.currentThread().isInterrupted()){
-	        socket = serverSocket.accept();
-	        System.out.println("connection Established");
-	        listenIn(socket);
-	        }
-	    
+		    while(!Thread.currentThread().isInterrupted()){
+		        socket = this.serverSocket.accept();
+		        System.out.println("connection Established");
+		        listenIn(socket);
+		    }
+		} catch (SocketException e) {
+			System.out.println("Server closed.");
 		}catch(IOException e){
-	    e.printStackTrace();
-	    System.out.println("Server error");
-	    }	
+		    e.printStackTrace();
+		    System.out.println("Server error");
+	    }
+		
+		try {
+			if(serverSocket!=null){serverSocket.close();}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void listenIn(Socket socket){  
