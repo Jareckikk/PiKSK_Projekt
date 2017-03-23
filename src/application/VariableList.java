@@ -13,8 +13,17 @@ public class VariableList {
 		return this.varMap;
 	}
 	
+	public boolean isVarExist(String var){
+		if(varMap.containsKey(var)) return true;
+		return false;
+	}
+	
+	public String getValue(String key){
+		return varMap.get(key);
+	}
+	
 	public String addVariable(String varName, String varValue){
-		if(!varName.matches("([a-zA-Z])\\w+")){
+		if(!varName.matches("([a-zA-Z])\\w*")){
 			return "Niepoprawna nazwa zmiennej!";
 		}
 		if(!varValue.matches("(\\d+)")){

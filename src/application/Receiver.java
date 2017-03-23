@@ -5,17 +5,19 @@ import java.net.ServerSocket;
 
 public class Receiver {
 	private ServerSocket serverSocket = null;
+	private MessageHandler message = null;
 	
-	Receiver(){
+	Receiver(MessageHandler message){
 		try {
-			serverSocket = new ServerSocket(4445);
+			this.serverSocket = new ServerSocket(4445);
+			this.message = message;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public void start() {
-    	Thread socketServer = new Thread(new ServerThread(serverSocket));
+    	Thread socketServer = new Thread(new ServerThread(serverSocket, message));
     	socketServer.start();
 	}
 	

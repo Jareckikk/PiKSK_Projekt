@@ -22,8 +22,20 @@ public class ClientThread {
 	        e.printStackTrace();
 	        System.err.print("IO Exception");
 	    }
+	    
+	    if(msg.equals("NaN")){
+	    	os.println("NaN");
+	    	System.out.println("Wysy³am NaN");
+	    } else if(msg.matches("\\d+")){
+	    	os.println(msg);
+	    	System.out.println("Wysy³am " + msg);
+	    }
+	    else {
+	        os.println("<\"" + InetAddress.getLocalHost().getHostAddress() + "\"." + msg + ">");
+	        System.out.println("Wysy³am: <\"" + InetAddress.getLocalHost().getHostAddress() + "\"." + msg + ">");
+	    }
+	    
 
-        os.println(msg);
         os.flush();       
         if(s1!=null){s1.close();}
         if(os!=null){os.close();}

@@ -10,9 +10,11 @@ import java.net.SocketException;
 
 public class ServerThread implements Runnable{
 	ServerSocket serverSocket;
+	MessageHandler message;
 	
-	ServerThread(ServerSocket ss){
+	ServerThread(ServerSocket ss, MessageHandler msg){
 		this.serverSocket = ss;
+		this.message = msg;
 	}
 	
 	public void run(){
@@ -49,7 +51,8 @@ public class ServerThread implements Runnable{
 
 		    line=is.readLine();   
 		    System.out.println(line);
-	
+		    this.message.registerMsg(line);
+		    
 	        if(is!=null){is.close();}
 	        if(os!=null){os.close();}
 	        if(socket!=null){socket.close();}
