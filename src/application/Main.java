@@ -27,7 +27,6 @@ public class Main extends Application {
 	
 	@Override
 	public void stop() throws IOException{
-	    
-		//AppHandler.receiver.kill();
+		AppHandler.receiver.kill();
 	}
 }

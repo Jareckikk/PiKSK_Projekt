@@ -23,16 +23,12 @@ public class VariableList {
 	}
 	
 	public String addVariable(String varName, String varValue){
-		System.out.println(varName);
-		System.out.println(varValue);
-		
 		if(!varName.matches("([a-zA-Z])\\w*")){
 			return "Niepoprawna nazwa zmiennej!";
 		}
 		if(!varValue.matches("(\\d+)")){
 			return "Niepoprawna wartoœæ zmiennej!";
 		}
-		System.out.println("tutej");
 		this.varMap.put(varName, varValue);
 		return "Dodano/Zmieniono zmienn¹.";
 	}

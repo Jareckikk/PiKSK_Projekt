@@ -32,7 +32,7 @@ public class mainController {
 	@FXML
 	private ListView varList;
 	
-	public AppHandler appHandler = new AppHandler(statusNote);
+	public AppHandler appHandler = null;
 	
     public void initialize(){
     	try {
@@ -40,6 +40,7 @@ public class mainController {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
+    	this.appHandler = new AppHandler(this.statusNote);
     	this.appHandler.receiver.start();    	   	
     }
 	
@@ -49,6 +50,7 @@ public class mainController {
     }
     
     public void send() throws IOException{
+    	statusNote.setText("");
     	this.appHandler.message.send(this.inputCmd.getText());
     }
     

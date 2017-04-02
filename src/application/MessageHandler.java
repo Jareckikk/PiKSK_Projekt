@@ -19,52 +19,50 @@ public class MessageHandler {
 	
 	public boolean parseLine(String line){
 		line = line.replaceAll("\\s+",""); //Usuwamy wszystkie bia³e znaki.
-		if(line.matches("{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])}"
-						+ "\\.([a-zA-Z])\\w*(=\\d+)*>"
-						+ "([\\+\\-\\/\\*]"
-						+ "<\"(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\"\\.([a-zA-Z])\\w*(=\\d+)*)*")) {
+		
+		//Sprawdzamy czy zgodny ze wzorcem -> {12.13.31.3}.x+{2.2.2.2}.y=3/{34.1.3.3}.y <- on jest b³êdny, bo y=3 moze wytapic tylko samotnie, sprawdzamy to pozniej
+		if(line.matches("\\{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\}\\.([a-zA-Z])\\w*(=\\d+)*"
+				+ "([\\+\\-\\/\\*]\\{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\}\\.([a-zA-Z])\\w*(=\\d+)*)*")) {
 			
+			//Rozdzielamy wszystkie dzia³ania
 			boolean openBracket = false;
 			for(int i = 0; i < line.length(); i++){
-				if(line.charAt(i) == '<'){
-					openBracket = true;
-				}
-				if(line.charAt(i) == '>' && openBracket){
-					openBracket = false;
-					operands.add(line.substring(0, i + 1));
-					line = line.substring(i + 1);
+				if(Character.toString(line.charAt(i)).matches("[\\+|\\-|\\/|\\*]")){ //Szukamy + - / *
+					operators.add(Character.toString(line.charAt(i))); //{1.1.1.1}.x lub {2.2.2.2}.x=1 trafia do operatorow
+					operands.add(line.substring(0, i)); // +-/* trafia do operandow
+					line = line.substring(i + 1); //wyrzucamy wylapane operatory i operandy
 					i = -1;
-					continue;
-				} else if(line.charAt(i) == '>' && !openBracket) {
-					return false;
 				}
-				if(openBracket){continue;}
-				if(Character.toString(line.charAt(i)).matches("[\\+|\\-|\\/|\\*]")){
-					operators.add(Character.toString(line.charAt(i)));
-					line = line.substring(i + 1);
-					i = -1;
-				} else {return false;}
+				if(i == line.length() - 1){ //Jesli ostatni lub jedyny, to odrazu do operandow
+					operands.add(line);
+				}				
 			}
-		} else {return false;}
+		} else {
+			clearAll();
+			return false;}
 		
 		if(operands.size() > 1){ //Moze byæ tylko jedno polecenie przypisania w poleceniu
 			for(String s : operands){
-				if(s.matches("{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])}\\.([a-zA-Z])\\w*=\\d+")){
+				if(s.matches("\\{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\}\\.([a-zA-Z])\\w*=\\d+")){
+					clearAll();
 					return false;
 				}
 			}
 		}
 		
 		if(operands.size() - operators.size() != 1){ //Operandów musi byæ o jeden wiêcej ni¿ operatorów
+			clearAll();
 			return false;
 		}
-		
+	
+		/*
 		for(String s : operators){
 			System.out.println(s);
 		}
 		for(String s : operands){
 			System.out.println(s);
-		}
+		}*/
+
 		return true;
 	}
 	
@@ -82,6 +80,7 @@ public class MessageHandler {
 						lastRsp = null;
 					}
 				} catch (Exception e) {
+					e.getMessage();
 					statusNote.setText("B³¹d w poleceniu!");
 				}		
 			}
@@ -90,20 +89,17 @@ public class MessageHandler {
 			//TODO
 			if(operands.size() > 1){
 				
-			} else {
-				statusNote.setText("Nieprawid³owe polecenie!");
-			}
+			} 
 			
-			operators.clear();
-			operands.clear();
+			clearAll();
 		} else{
-			statusNote.setText("Nieprawid³owe polecenie!");
+			statusNote.setText("Nieprawid³owe polecenie! 13");
 		}
 	}
 	
 	public void registerMsg(String msg){
 		//x=1
-		if(msg.matches("{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])}\\.([a-zA-Z])\\w*=\\d+")){
+		if(msg.matches("\\{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\}\\.([a-zA-Z])\\w*=\\d+")){
 			try {
 				Command cmd = new Command(msg);
 				if(this.varList.isVarExist(cmd.variable)){
@@ -115,7 +111,7 @@ public class MessageHandler {
 				e.printStackTrace();
 			}
 						
-		} else if(msg.matches("{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])}\\.([a-zA-Z])\\w*")){ //x
+		} else if(msg.matches("\\{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\}\\.([a-zA-Z])\\w*")){ //x
 			try {
 				Command cmd = new Command(msg);
 				if(this.varList.isVarExist(cmd.variable)){				
@@ -132,12 +128,12 @@ public class MessageHandler {
 			statusNote.setText("NaN");
 		} else {
 			statusNote.setText("Odebrano nieprawid³owe polecenie!");
-		}
-		
-		
-		
-		
-		
+		}	
+	}
+	
+	private void clearAll(){
+		operators.clear();
+		operands.clear();
 	}
 	
 	class Command {
@@ -147,11 +143,11 @@ public class MessageHandler {
 		boolean valueSet = false;
 		
 		Command(String operand) throws Exception{//TODO
-			operand = operand.substring(1); //Wywalamy {
+			//operand = operand.substring(1); //Wywalamy {
 			
 			for(int i = 0; i < operand.length(); i++){
-				if(operand.charAt(i) == '"'){
-					this.address = operand.substring(0, i + 1);
+				if(operand.charAt(i) == '}'){
+					this.address = operand.substring(1, i);
 					operand = operand.substring(i + 1);
 					break;
 				}
@@ -160,21 +156,22 @@ public class MessageHandler {
 				throw new Exception("Incorrect IP address!");
 			}
 			
-			if(operand.matches("\\.([a-zA-Z])\\w*=\\d+>")){
-				operand = operand.substring(1, operand.length() - 1);
+			if(operand.matches("\\.([a-zA-Z])\\w*=\\d+")){
+				operand = operand.substring(1, operand.length());
 				String[] opvalue = operand.split("=");
 				this.variable = opvalue[0];
 				this.value = Integer.parseInt(opvalue[1]);
 				this.valueSet = true;
-			} else if(operand.matches("\\.([a-zA-Z])\\w*>")){
-				operand = operand.substring(1, operand.length() - 1);
+			} else if(operand.matches("\\.([a-zA-Z])\\w*")){
+				operand = operand.substring(1, operand.length());
 				this.variable = operand;
 			} else {
 				throw new Exception("Incorrect parameteres!");
 			}
+			
 		}
 		
-		String getMsg(){
+		public String getMsg(){
 			if(valueSet){
 				return this.variable + "=" + this.value;
 			} else {

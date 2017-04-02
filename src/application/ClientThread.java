@@ -13,10 +13,13 @@ public class ClientThread {
 	    InetAddress address=InetAddress.getByName(ipAddress);
 	    Socket s1=null;
 	    PrintWriter os=null;
-
+	    System.out.println("tukej1");
 	    try {
+	    	System.out.println("Tukej1,5 " + address.getHostAddress());
 	        s1=new Socket(address, 4445); // You can use static final constant PORT_NUM
+	        System.out.println("tukej2");
 	        os= new PrintWriter(s1.getOutputStream());
+	        System.out.println("tukej3");
 	    }
 	    catch (IOException e){
 	        e.printStackTrace();
@@ -24,15 +27,15 @@ public class ClientThread {
 	    }
 	    
 	    if(msg.equals("NaN")){
-	    	os.println("NaN");
 	    	System.out.println("Wysy³am NaN");
+	    	os.println("NaN");
 	    } else if(msg.matches("\\d+")){
-	    	os.println(msg);
 	    	System.out.println("Wysy³am " + msg);
+	    	os.println(msg);
 	    }
 	    else {
-	        os.println("<\"" + InetAddress.getLocalHost().getHostAddress() + "\"." + msg + ">");
-	        System.out.println("Wysy³am: <\"" + InetAddress.getLocalHost().getHostAddress() + "\"." + msg + ">");
+	    	System.out.println("Wysy³am: {" + InetAddress.getLocalHost().getHostAddress() + "}." + msg);
+	        os.println("{" + InetAddress.getLocalHost().getHostAddress() + "}." + msg);
 	    }
 	    
 

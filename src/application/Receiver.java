@@ -19,11 +19,13 @@ public class Receiver {
 	public void start() {
     	Thread socketServer = new Thread(new ServerThread(serverSocket, message));
     	socketServer.start();
+    	System.out.println("Receiver started.");
 	}
 	
 	public void kill(){
 		if((serverSocket != null) && (!serverSocket.isClosed())){try {
 			serverSocket.close();
+			System.out.println("Receiver stopped.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}}
