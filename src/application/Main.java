@@ -10,10 +10,8 @@ import javafx.stage.Stage;
 
 
 public class Main extends Application {
-	 
-	
 	private Stage primaryStage;
-
+	
     @Override
     public void start(Stage primaryStage) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("windowView.fxml"));
@@ -29,6 +27,7 @@ public class Main extends Application {
 	
 	@Override
 	public void stop() throws IOException{
-	    mainController.appHandler.receiver.kill();
+	    
+		//AppHandler.receiver.kill();
 	}
 }

@@ -8,19 +8,21 @@ import javafx.scene.control.Label;
 public class MessageHandler {
 	List<String> operands = new ArrayList<String>();
 	List<String> operators = new ArrayList<String>();
+	private VariableList varList;
 	private Label statusNote = null;
 	private Integer lastRsp = null;
 		
-	MessageHandler(Label label){
+	MessageHandler(Label label, VariableList varList){
 		this.statusNote = label;
+		this.varList = varList;
 	}
 	
 	public boolean parseLine(String line){
 		line = line.replaceAll("\\s+",""); //Usuwamy wszystkie bia³e znaki.
-		if(line.matches("<\"(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\""
+		if(line.matches("{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])}"
 						+ "\\.([a-zA-Z])\\w*(=\\d+)*>"
 						+ "([\\+\\-\\/\\*]"
-						+ "<\"(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\"\\.([a-zA-Z])\\w*(=\\d+)*>)*")) {
+						+ "<\"(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\"\\.([a-zA-Z])\\w*(=\\d+)*)*")) {
 			
 			boolean openBracket = false;
 			for(int i = 0; i < line.length(); i++){
@@ -47,7 +49,7 @@ public class MessageHandler {
 		
 		if(operands.size() > 1){ //Moze byæ tylko jedno polecenie przypisania w poleceniu
 			for(String s : operands){
-				if(s.matches("<\"(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\"\\.([a-zA-Z])\\w*=\\d+>")){
+				if(s.matches("{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])}\\.([a-zA-Z])\\w*=\\d+")){
 					return false;
 				}
 			}
@@ -101,11 +103,11 @@ public class MessageHandler {
 	
 	public void registerMsg(String msg){
 		//x=1
-		if(msg.matches("<\"(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\"\\.([a-zA-Z])\\w*=\\d+>")){
+		if(msg.matches("{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])}\\.([a-zA-Z])\\w*=\\d+")){
 			try {
 				Command cmd = new Command(msg);
-				if(mainController.appHandler.varList.isVarExist(cmd.variable)){
-					mainController.appHandler.varList.addVariable(cmd.variable, cmd.value.toString());
+				if(this.varList.isVarExist(cmd.variable)){
+					this.varList.addVariable(cmd.variable, cmd.value.toString());
 				} else {
 					ClientThread.send(cmd.address, "NaN");
 				}
@@ -113,11 +115,11 @@ public class MessageHandler {
 				e.printStackTrace();
 			}
 						
-		} else if(msg.matches("<\"(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\"\\.([a-zA-Z])\\w*>")){ //x
+		} else if(msg.matches("{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])}\\.([a-zA-Z])\\w*")){ //x
 			try {
 				Command cmd = new Command(msg);
-				if(mainController.appHandler.varList.isVarExist(cmd.variable)){				
-					ClientThread.send(cmd.address, mainController.appHandler.varList.getValue(cmd.variable));
+				if(this.varList.isVarExist(cmd.variable)){				
+					ClientThread.send(cmd.address, this.varList.getValue(cmd.variable));
 				} else {
 					ClientThread.send(cmd.address, "NaN");
 				}
@@ -144,8 +146,8 @@ public class MessageHandler {
 		Integer value;
 		boolean valueSet = false;
 		
-		Command(String operand) throws Exception{
-			operand = operand.substring(2); //Wywalamy <"
+		Command(String operand) throws Exception{//TODO
+			operand = operand.substring(1); //Wywalamy {
 			
 			for(int i = 0; i < operand.length(); i++){
 				if(operand.charAt(i) == '"'){

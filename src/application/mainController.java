@@ -18,7 +18,7 @@ public class mainController {
 	private Label ipLabel;
 	
 	@FXML
-	private static Label statusNote;
+	private Label statusNote;
 	
 	@FXML
 	private TextField varName;
@@ -32,7 +32,7 @@ public class mainController {
 	@FXML
 	private ListView varList;
 	
-	public static AppHandler appHandler = new AppHandler(statusNote);
+	public AppHandler appHandler = new AppHandler(statusNote);
 	
     public void initialize(){
     	try {
@@ -55,4 +55,6 @@ public class mainController {
 	private void refreshView(){
 		this.varList.setItems(this.appHandler.varList.getListViewItems());
 	}
+	
+
 }
