@@ -13,13 +13,9 @@ public class ClientThread {
 	    InetAddress address=InetAddress.getByName(ipAddress);
 	    Socket s1=null;
 	    PrintWriter os=null;
-	    System.out.println("tukej1");
 	    try {
-	    	System.out.println("Tukej1,5 " + address.getHostAddress());
 	        s1=new Socket(address, 4445); // You can use static final constant PORT_NUM
-	        System.out.println("tukej2");
 	        os= new PrintWriter(s1.getOutputStream());
-	        System.out.println("tukej3");
 	    }
 	    catch (IOException e){
 	        e.printStackTrace();

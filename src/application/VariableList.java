@@ -3,11 +3,18 @@ package application;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.ListView;
 
 public class VariableList {
 	HashMap<String, String> varMap = new HashMap<String, String>();
+	ListView listView = null;
+	
+	VariableList(ListView listView){
+		this.listView = listView;
+	}
 	
 	private Map getMap(){
 		return this.varMap;
@@ -41,5 +48,15 @@ public class VariableList {
 		    items.add(key + " = " + value);
 		}
 		return items;
+	}
+
+	public void refresh() {
+		Platform.runLater(new Runnable() {
+		    @Override
+		    public void run() {
+		    	listView.setItems(getListViewItems());
+		    }
+		});
+		
 	}
 }

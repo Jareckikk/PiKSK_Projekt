@@ -50,7 +50,7 @@ public class ServerThread implements Runnable{
 	        os=new PrintWriter(socket.getOutputStream());
 
 		    line=is.readLine();   
-		    System.out.println(line);
+		    System.out.println("Odebrano: " + line);
 		    this.message.registerMsg(line);
 		    
 	        if(is!=null){is.close();}

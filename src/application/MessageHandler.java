@@ -3,6 +3,7 @@ package application;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 
 public class MessageHandler {
@@ -10,7 +11,7 @@ public class MessageHandler {
 	List<String> operators = new ArrayList<String>();
 	private VariableList varList;
 	private Label statusNote = null;
-	private Integer lastRsp = null;
+	private String lastRsp = "";
 		
 	MessageHandler(Label label, VariableList varList){
 		this.statusNote = label;
@@ -74,26 +75,67 @@ public class MessageHandler {
 				try {
 					cmd = new Command(operands.get(0));
 					ClientThread.send(cmd.address, cmd.getMsg());
-					if(cmd.value != null){
-						while(this.lastRsp == null){} //Waiting for response
-						statusNote.setText(lastRsp.toString());
-						lastRsp = null;
+					if(cmd.value == null){
+						int cnt = 0;
+						while(this.lastRsp.equals("")){  //Waiting for response
+							Thread.sleep(1);
+							cnt++;
+							if(cnt == 1000){
+								setText("Problem z odbiorem wiadomoœci!");
+								break;
+							}
+						}
+						setText(lastRsp.toString());
+						lastRsp = "";
 					}
 				} catch (Exception e) {
 					e.getMessage();
-					statusNote.setText("B³¹d w poleceniu!");
+					setText("B³¹d w poleceniu!");
 				}		
 			}
 			
-			
-			//TODO
 			if(operands.size() > 1){
-				
+				String result = "";
+				for(int i = 0; i < operands.size(); i++){
+					Command cmd;
+					try {
+						cmd = new Command(operands.get(i));
+						ClientThread.send(cmd.address, cmd.getMsg());	
+						
+						int cnt = 0;
+						while(this.lastRsp.equals("")){  //Waiting for response
+							Thread.sleep(1);
+							cnt++;
+							if(cnt == 1000){
+								setText("Problem z odbiorem wiadomoœci!");
+								return;
+							}
+						}
+						if(lastRsp.equals("NaN")){
+							setText("NaN");
+							lastRsp = "";
+							return;
+						}		
+						result += lastRsp.toString();
+						lastRsp = "";
+						
+					} catch (Exception e) {
+						e.getMessage();
+						setText("B³¹d w poleceniu!");
+					}		
+					
+					if(i < operators.size()){
+						result += operators.get(i);
+					}				
+				}
+				System.out.println("Wynik: " + result); 
+				Expression exp = new Expression(result);
+				setText("Wynik: " + result + " = " + exp.eval().toBigInteger().toString());
 			} 
 			
 			clearAll();
 		} else{
-			statusNote.setText("Nieprawid³owe polecenie! 13");
+			setText("Nieprawid³owe polecenie! 13");
 		}
 	}
 	
@@ -103,7 +145,9 @@ public class MessageHandler {
 			try {
 				Command cmd = new Command(msg);
 				if(this.varList.isVarExist(cmd.variable)){
+					System.out.println(cmd.variable + " " + cmd.value.toString());
 					this.varList.addVariable(cmd.variable, cmd.value.toString());
+					this.varList.refresh();
 				} else {
 					ClientThread.send(cmd.address, "NaN");
 				}
@@ -111,7 +155,7 @@ public class MessageHandler {
 				e.printStackTrace();
 			}
 						
-		} else if(msg.matches("\\{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\}\\.([a-zA-Z])\\w*")){ //x
+		} else if(msg.matches("\\{(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\}\\.([a-zA-Z])\\w*")){ //x //TODO
 			try {
 				Command cmd = new Command(msg);
 				if(this.varList.isVarExist(cmd.variable)){				
@@ -123,11 +167,12 @@ public class MessageHandler {
 				e.printStackTrace();
 			}
 		} else if(msg.matches("\\d+")){ //23 //TODO
-			this.lastRsp = Integer.parseInt(msg);
+			this.lastRsp = msg;
 		} else if(msg.matches("NaN")){//NaN
-			statusNote.setText("NaN");
+			this.lastRsp = "NaN";
+			setText("NaN");
 		} else {
-			statusNote.setText("Odebrano nieprawid³owe polecenie!");
+			setText("Odebrano nieprawid³owe polecenie!");
 		}	
 	}
 	
@@ -136,15 +181,22 @@ public class MessageHandler {
 		operands.clear();
 	}
 	
+	private void setText(String text){
+		Platform.runLater(new Runnable() {
+		    @Override
+		    public void run() {
+		    	statusNote.setText(text);
+		    }
+		});
+	}
+	
 	class Command {
 		String address;
 		String variable;
 		Integer value;
 		boolean valueSet = false;
 		
-		Command(String operand) throws Exception{//TODO
-			//operand = operand.substring(1); //Wywalamy {
-			
+		Command(String operand) throws Exception{			
 			for(int i = 0; i < operand.length(); i++){
 				if(operand.charAt(i) == '}'){
 					this.address = operand.substring(1, i);
@@ -167,8 +219,7 @@ public class MessageHandler {
 				this.variable = operand;
 			} else {
 				throw new Exception("Incorrect parameteres!");
-			}
-			
+			}	
 		}
 		
 		public String getMsg(){

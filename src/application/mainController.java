@@ -40,23 +40,18 @@ public class mainController {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-    	this.appHandler = new AppHandler(this.statusNote);
+    	this.appHandler = new AppHandler(this.statusNote, this.varList);
     	this.appHandler.receiver.start();    	   	
     }
 	
     public void addVariable(){
     	statusNote.setText(this.appHandler.varList.addVariable(this.varName.getText(), this.varValue.getText()));
-    	this.refreshView();
+    	this.appHandler.varList.refresh();
     }
     
     public void send() throws IOException{
     	statusNote.setText("");
     	this.appHandler.message.send(this.inputCmd.getText());
     }
-    
-	private void refreshView(){
-		this.varList.setItems(this.appHandler.varList.getListViewItems());
-	}
-	
 
 }
